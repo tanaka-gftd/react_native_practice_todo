@@ -8,7 +8,7 @@ import {
     View, 
     TextInput, 
     TouchableOpacity, 
-    FlatList
+    FlatList,
 } from 'react-native';
 
 //モーダル用
@@ -86,7 +86,8 @@ const App = () => {
                     justifyContent: 'center', 
                     alignItems: 'center', 
                     backgroundColor: "#fff", 
-                    height:300
+                    height:300,
+                    zIndex:1
                 }}
             >
                 <Text style={{fontSize: 16, marginBottom:25, fontWeight:'bold'}}>
@@ -160,6 +161,23 @@ const App = () => {
             />
 
             <TaskModal visible={showModal} index={deleteIndex}/>
+
+            {
+            showModal? 
+                <View
+                    style={{
+                        bottom: 0,
+                        left: 0,
+                        position: 'absolute',
+                        right: 0,
+                        top: 0,
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        zIndex:0
+                    }}
+                />
+                :
+                null
+            }
         </View>
     );
 };

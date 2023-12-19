@@ -8,8 +8,12 @@ import {
     View, 
     TextInput, 
     TouchableOpacity, 
-    FlatList 
+    FlatList
 } from 'react-native';
+
+//モーダル用
+import Modal  from "react-native-modal";
+
 
 const App = () => {
 
@@ -22,12 +26,17 @@ const App = () => {
     //タスクのエディット用
     const [editIndex, setEditIndex] = useState(-1);
 
+    //削除確認用モーダルの表示非表示切り替え用
+    const [showModal, setShowModal] = useState(false);
+
+    //タスクを格納した配列から、削除対象となるインデックス
+    const [deleteIndex, setDeleteIndex] = useState(0);
+
+
     //タスクの新規登録orタスク名の変更を保存
     const handleAddTask = () => {
-
         //フォームにタスク名が入力されていれば、以下の処理を行う
         if(taskName){
-            
             if(editIndex !== -1){
                 //「editIndex !== -1」の場合、つまり、タスク名を変更中の場合なら、変更されたタスク名を保存し終了
                 const updatedTasks = [...taskArray];
@@ -38,11 +47,11 @@ const App = () => {
                 //新規登録の場合は配列に追加
                 setTaskArray([...taskArray, taskName]);
             }
-
             //処理後、フォーム欄を空欄にする
             setTaskName("");
         }
     };
+
 
     //タスク名の変更
     const handleEditTask = (index) => { 
@@ -51,13 +60,59 @@ const App = () => {
         setEditIndex(index); 
     }; 
 
+
+    //削除確認用モーダルの表示
+    const openDeleteModal = (index) => {
+        setShowModal(true);
+        setDeleteIndex(index);
+    }
+
+
     //タスクの削除
     //taskArrayから指定されたインデックスの要素(タスク)を削除して、 setTaskArrayでセットし直す
     const handleDeleteTask = (index) => { 
         const updatedTasks = [...taskArray]; 
         updatedTasks.splice(index, 1); 
-        setTaskArray(updatedTasks); 
+        setTaskArray(updatedTasks);
+        setShowModal(false);
     }; 
+
+
+    //タスク削除の確認用モーダル
+    const TaskModal = () => (
+        <Modal visible={showModal}>
+            <View 
+                style={{ 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    backgroundColor: "#fff", 
+                    height:300
+                }}
+            >
+                <Text style={{fontSize: 16, marginBottom:25, fontWeight:'bold'}}>
+                    タスク名：{taskArray[deleteIndex]} を本当に削除しますか？
+                </Text>
+                
+                <View>
+                    <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center'}}>
+                        <Text 
+                            style={{color: "red", fontSize: 16, marginBottom:30}} 
+                            onPress={() => handleDeleteTask(deleteIndex)}
+                        >
+                            タスクを削除する
+                        </Text>
+                        <Text 
+                            style={{fontSize: 16}} 
+                            onPress={()=>setShowModal(false)}
+                        >
+                            タスクを削除しない
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+    )
+
 
     //現在登録されているタスクを表示していく
     //タスク名変更とタスク削除も追加
@@ -72,12 +127,13 @@ const App = () => {
                     <Text style={styles.editButton}>タスク名変更</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => handleDeleteTask(index)}>
+                <TouchableOpacity onPress={()=>openDeleteModal(index)}>
                     <Text style={styles.deleteButton}>タスク削除</Text>
                 </TouchableOpacity>
             </View>
         </View>
     );
+
 
     return (
         <View style={styles.container}>
@@ -96,14 +152,18 @@ const App = () => {
                     {editIndex !== -1 ? "変更を保存" : "タスクを追加"}
                 </Text>
             </TouchableOpacity>
+
             <FlatList
                 data={taskArray} 
                 renderItem={renderItem} 
                 keyExtractor={(item, index) => index.toString()} 
             />
+
+            <TaskModal visible={showModal} index={deleteIndex}/>
         </View>
     );
 };
+
 
 const styles = StyleSheet.create({
     container: { 

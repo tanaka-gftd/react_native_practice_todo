@@ -68,7 +68,6 @@ const App = () => {
             </TouchableOpacity>
             
             <View style={styles.taskButtons}>
-
                 <TouchableOpacity onPress={()=>handleEditTask(index)}>
                     <Text style={styles.editButton}>タスク名変更</Text>
                 </TouchableOpacity>

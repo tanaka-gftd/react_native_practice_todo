@@ -62,7 +62,10 @@ const App = () => {
 
 
     //削除確認用モーダルの表示
+    //タスク名変更中に削除確認用モーダルを開いた場合、タスク名変更処理を取りやめる
     const openDeleteModal = (index) => {
+        setEditIndex(-1);
+        setTaskName("");
         setShowModal(true);
         setDeleteIndex(index);
     }
@@ -70,8 +73,8 @@ const App = () => {
 
     //タスクの削除
     //taskArrayから指定されたインデックスの要素(タスク)を削除して、 setTaskArrayでセットし直す
-    const deleteTask = (index) => { 
-        const updatedTasks = [...taskArray]; 
+    const deleteTask = (index) => {
+        const updatedTasks = [...taskArray];
         updatedTasks.splice(index, 1); 
         setTaskArray(updatedTasks);
         setShowModal(false);

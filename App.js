@@ -82,8 +82,11 @@ const App = () => {
     const TaskModal = () => (
         <Modal visible={showModal}>
             <View style={styles.modalWindow}>
+                <Text style={{fontSize: 20, marginBottom: 25, fontWeight: "bold"}}>
+                    {taskArray[deleteIndex]} 
+                </Text>
                 <Text style={{fontSize: 16, marginBottom: 25, fontWeight: "bold"}}>
-                    タスク名：{taskArray[deleteIndex]} を本当に削除しますか？
+                    このタスクを本当に削除しますか？
                 </Text>
                 
                 <View>

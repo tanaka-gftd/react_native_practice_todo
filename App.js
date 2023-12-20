@@ -90,20 +90,19 @@ const App = () => {
                 </Text>
                 
                 <View>
-                    <TouchableOpacity style={{justifyContent: "center", alignItems: "center"}}>
-                        <Text 
-                            style={{color: "red", fontSize: 16, marginBottom: 30}} 
-                            onPress={() => deleteTask(deleteIndex)}
-                        >
-                            タスクを削除する
-                        </Text>
-                        <Text 
-                            style={{fontSize: 16}} 
-                            onPress={()=>setShowModal(false)}
-                        >
-                            タスクを削除しない
-                        </Text>
-                    </TouchableOpacity>
+                    <View style={{justifyContent: "center", alignItems: "center"}}>
+                        <TouchableOpacity onPress={() => deleteTask(deleteIndex)}>
+                            <Text style={{color: "red", fontSize: 16, marginBottom: 30}}>
+                                削除する
+                            </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={()=>setShowModal(false)}>
+                            <Text style={{fontSize: 16}}>
+                                削除しない
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
         </Modal>

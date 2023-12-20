@@ -229,6 +229,7 @@ const styles = StyleSheet.create({
         alignItems: "center", 
         backgroundColor: "#fff", 
         height: 300,
+        borderRadius: 20,
         zIndex: 1
     },
     modalOverLay: {

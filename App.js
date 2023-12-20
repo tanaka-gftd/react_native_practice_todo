@@ -89,20 +89,19 @@ const App = () => {
                     このタスクを本当に削除しますか？
                 </Text>
                 
-                <View>
-                    <View style={{justifyContent: "center", alignItems: "center"}}>
-                        <TouchableOpacity onPress={() => deleteTask(deleteIndex)}>
-                            <Text style={{color: "red", fontSize: 16, marginBottom: 30}}>
-                                削除する
-                            </Text>
-                        </TouchableOpacity>
+                
+                <View style={{justifyContent: "center", alignItems: "center"}}>
+                    <TouchableOpacity onPress={() => deleteTask(deleteIndex)}>
+                        <Text style={{color: "red", fontSize: 16, marginBottom: 30}}>
+                            削除する
+                        </Text>
+                    </TouchableOpacity>
 
-                        <TouchableOpacity onPress={()=>setShowModal(false)}>
-                            <Text style={{fontSize: 16}}>
-                                削除しない
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity onPress={()=>setShowModal(false)}>
+                        <Text style={{fontSize: 16}}>
+                            削除しない
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </Modal>
@@ -112,10 +111,10 @@ const App = () => {
     //現在登録されているタスクを表示していく
     //タスク名変更とタスク削除も追加
     const TaskList = ({item, index}) => (
-        <View style={styles.task}>
-            <TouchableOpacity onPress={()=>showDetailWindow(index)}>
+        <>
+            <View>
                 <Text style={styles.itemList}>{item}</Text>
-            </TouchableOpacity>
+            </View>
             
             <View style={styles.taskButtons}>
                 <TouchableOpacity onPress={()=>editTask(index)}>
@@ -126,7 +125,7 @@ const App = () => {
                     <Text style={styles.deleteButton}>タスク削除</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </>
     );
 
 
@@ -199,18 +198,14 @@ const styles = StyleSheet.create({
         textAlign: "center", 
         fontSize: 18, 
     }, 
-    task: { 
-        flexDirection: "row", 
-        justifyContent: "space-between", 
-        alignItems: "center", 
-        marginBottom: 15, 
-        fontSize: 18, 
-    }, 
     itemList: { 
         fontSize: 19, 
     }, 
     taskButtons: { 
-        flexDirection: "row", 
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        marginTop: 5,
+        marginBottom: 20, 
     }, 
     editButton: { 
         marginRight: 10, 

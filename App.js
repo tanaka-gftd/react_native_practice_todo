@@ -9,7 +9,7 @@ import {
     TextInput, 
     TouchableOpacity, 
     FlatList,
-} from 'react-native';
+} from "react-native";
 
 //モーダル用
 import Modal  from "react-native-modal";
@@ -34,7 +34,7 @@ const App = () => {
 
 
     //タスクの新規登録orタスク名の変更を保存
-    const handleAddTask = () => {
+    const addTask = () => {
         //フォームにタスク名が入力されていれば、以下の処理を行う
         if(taskName){
             if(editIndex !== -1){
@@ -54,7 +54,7 @@ const App = () => {
 
 
     //タスク名の変更
-    const handleEditTask = (index) => { 
+    const editTask = (index) => { 
         const taskToEdit = taskArray[index]; 
         setTaskName(taskToEdit); //変更したいタスクの名前をフォームに表示させる
         setEditIndex(index); 
@@ -70,7 +70,7 @@ const App = () => {
 
     //タスクの削除
     //taskArrayから指定されたインデックスの要素(タスク)を削除して、 setTaskArrayでセットし直す
-    const handleDeleteTask = (index) => { 
+    const deleteTask = (index) => { 
         const updatedTasks = [...taskArray]; 
         updatedTasks.splice(index, 1); 
         setTaskArray(updatedTasks);
@@ -81,24 +81,16 @@ const App = () => {
     //タスク削除の確認用モーダル
     const TaskModal = () => (
         <Modal visible={showModal}>
-            <View 
-                style={{ 
-                    justifyContent: 'center', 
-                    alignItems: 'center', 
-                    backgroundColor: "#fff", 
-                    height:300,
-                    zIndex:1
-                }}
-            >
-                <Text style={{fontSize: 16, marginBottom:25, fontWeight:'bold'}}>
+            <View style={styles.modalWindow}>
+                <Text style={{fontSize: 16, marginBottom: 25, fontWeight: "bold"}}>
                     タスク名：{taskArray[deleteIndex]} を本当に削除しますか？
                 </Text>
                 
                 <View>
-                    <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <TouchableOpacity style={{justifyContent: "center", alignItems: "center"}}>
                         <Text 
-                            style={{color: "red", fontSize: 16, marginBottom:30}} 
-                            onPress={() => handleDeleteTask(deleteIndex)}
+                            style={{color: "red", fontSize: 16, marginBottom: 30}} 
+                            onPress={() => deleteTask(deleteIndex)}
                         >
                             タスクを削除する
                         </Text>
@@ -117,14 +109,14 @@ const App = () => {
 
     //現在登録されているタスクを表示していく
     //タスク名変更とタスク削除も追加
-    const renderItem = ({item, index}) => (
+    const TaskList = ({item, index}) => (
         <View style={styles.task}>
             <TouchableOpacity onPress={()=>showDetailWindow(index)}>
                 <Text style={styles.itemList}>{item}</Text>
             </TouchableOpacity>
             
             <View style={styles.taskButtons}>
-                <TouchableOpacity onPress={()=>handleEditTask(index)}>
+                <TouchableOpacity onPress={()=>editTask(index)}>
                     <Text style={styles.editButton}>タスク名変更</Text>
                 </TouchableOpacity>
 
@@ -141,13 +133,13 @@ const App = () => {
             <Text style={styles.title}>シンプルなToDoアプリ</Text>
             <TextInput
                 style={styles.input}
-                placeholder='タスク名を入力してください'
+                placeholder="タスク名を入力してください"
                 value={taskName}
                 onChangeText={(text) => setTaskName(text)}
             />
             <TouchableOpacity 
                 style={styles.addButton} 
-                onPress={handleAddTask}
+                onPress={addTask}
             >
                 <Text style={styles.addButtonText}>
                     {editIndex !== -1 ? "変更を保存" : "タスクを追加"}
@@ -156,7 +148,7 @@ const App = () => {
 
             <FlatList
                 data={taskArray} 
-                renderItem={renderItem} 
+                renderItem={TaskList} 
                 keyExtractor={(item, index) => index.toString()} 
             />
 
@@ -243,7 +235,14 @@ const styles = StyleSheet.create({
         color: "red", 
         fontWeight: "bold", 
         fontSize: 18, 
-    }, 
+    },
+    modalWindow: {
+        justifyContent: "center", 
+        alignItems: "center", 
+        backgroundColor: "#fff", 
+        height: 300,
+        zIndex: 1
+    }
 });
 
 export default App;

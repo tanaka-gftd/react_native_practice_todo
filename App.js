@@ -154,22 +154,7 @@ const App = () => {
 
             <TaskModal visible={showModal} index={deleteIndex}/>
 
-            {
-            showModal? 
-                <View
-                    style={{
-                        bottom: 0,
-                        left: 0,
-                        position: 'absolute',
-                        right: 0,
-                        top: 0,
-                        backgroundColor: 'rgba(0,0,0,0.7)',
-                        zIndex:0
-                    }}
-                />
-                :
-                null
-            }
+            {showModal? <View style={styles.modalOverLay}/> : null}
         </View>
     );
 };
@@ -242,6 +227,21 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff", 
         height: 300,
         zIndex: 1
+    },
+    modalOverLay: {
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        ...StyleSheet.absoluteFillObject,
+        /* 
+            StyleSheet.absoluteFillObject とは、
+            以下のスタイルと同一
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0
+            StyleSheet.absoluteFill というのもあるが、
+            現状、そこまでの違いはないらしい。
+        */
     }
 });
 

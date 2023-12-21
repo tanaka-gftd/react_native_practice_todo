@@ -1,5 +1,5 @@
-//ReactのHookを導入
-import React, {useState} from "react";
+//ReactとReactのHookを導入
+import React, { useState } from "react";
 
 //ReactNativeのコンポーネントを導入
 import { 
@@ -11,8 +11,14 @@ import {
     FlatList,
 } from "react-native";
 
-//モーダル用
+//モーダル用ライブラリ
 import Modal  from "react-native-modal";
+
+//ReactNativeのUI部品が使えるライブラリを導入
+import { ListItem } from '@rneui/themed';
+
+//表示エリアが適切な場所(画面上部と被らないなど)になるよう、自動でパディングしてくれるライブラリ
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 
 const App = () => {
@@ -32,6 +38,9 @@ const App = () => {
     //タスクを格納した配列から、削除対象となるインデックス
     const [deleteIndex, setDeleteIndex] = useState(0);
 
+    //各チェックボックスの状態を管理する配列用
+    const [checkArray, setCheckArray] = useState([]);
+
 
     //タスクの新規登録orタスク名の変更を保存
     const addTask = () => {
@@ -45,7 +54,8 @@ const App = () => {
                 setEditIndex(-1);
             }else{
                 //新規登録の場合は配列に追加
-                setTaskArray([...taskArray, taskName]);
+                setTaskArray([...taskArray, taskName]);  //タスク名を保存する配列に追加
+                setCheckArray([...checkArray, false]);  //チェックボックスを管理する配列にも新規追加(初期値はfalseで未チェック)
             }
             //処理後、フォーム欄を空欄にする
             setTaskName("");
@@ -68,17 +78,32 @@ const App = () => {
         setTaskName("");
         setShowModal(true);
         setDeleteIndex(index);
-    }
+    };
 
 
     //タスクの削除
     //taskArrayから指定されたインデックスの要素(タスク)を削除して、 setTaskArrayでセットし直す
+    //削除するタスクのチェックボックスの状態も削除
     const deleteTask = (index) => {
         const updatedTasks = [...taskArray];
         updatedTasks.splice(index, 1); 
         setTaskArray(updatedTasks);
+
+        const updateCheckArray = [...checkArray];
+        updateCheckArray.splice(index, 1); 
+        setCheckArray(updateCheckArray);
+
+        //モーダルを閉じる
         setShowModal(false);
-    }; 
+    };
+
+
+    //チェックボックスのチェック,未チェック切り替え
+    const check = (index) => {
+        const updateCheckArray = [...checkArray];
+        updateCheckArray[index] = !updateCheckArray[index];
+        setCheckArray(updateCheckArray);
+    }
 
 
     //タスク削除の確認用モーダル
@@ -113,53 +138,69 @@ const App = () => {
 
     //現在登録されているタスクを表示していく
     //タスク名変更とタスク削除も追加
+    //各タスクごとにチェックボックスも用意
     const TaskList = ({item, index}) => (
-        <>
-            <View>
-                <Text style={styles.itemList}>{item}</Text>
-            </View>
+        <View style={{borderBottomWidth: 1}}>
+            <ListItem>
+                <ListItem.Content>
+                    <ListItem.Title style={styles.itemList}>
+                        {item}
+                    </ListItem.Title>
+                    
+                    <ListItem.CheckBox
+                        title="完了したらチェック"
+                        checkedTitle="タスク完了済み"
+                        checked={checkArray[index]}
+                        checkedColor="#367b22"
+                        onPress={()=>check(index)}
+                        containerStyle={{marginTop:10, marginBottom:15}}
+                    />
             
-            <View style={styles.taskButtons}>
-                <TouchableOpacity onPress={()=>editTask(index)}>
-                    <Text style={styles.editButton}>タスク名変更</Text>
-                </TouchableOpacity>
+                    <View style={styles.taskButtons}>
+                        <TouchableOpacity onPress={()=>editTask(index)}>
+                            <Text style={styles.editButton}>タスク名変更</Text>
+                        </TouchableOpacity>
 
-                <TouchableOpacity onPress={()=>openDeleteModal(index)}>
-                    <Text style={styles.deleteButton}>タスク削除</Text>
-                </TouchableOpacity>
-            </View>
-        </>
+                        <TouchableOpacity onPress={()=>openDeleteModal(index)}>
+                            <Text style={styles.deleteButton}>タスク削除</Text>
+                        </TouchableOpacity>
+                    </View>
+                </ListItem.Content>
+            </ListItem>
+        </View>
     );
 
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>シンプルなToDoアプリ</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="タスク名を入力してください"
-                value={taskName}
-                onChangeText={(text) => setTaskName(text)}
-            />
-            <TouchableOpacity 
-                style={styles.addButton} 
-                onPress={addTask}
-            >
-                <Text style={styles.addButtonText}>
-                    {editIndex !== -1 ? "変更を保存" : "タスクを追加"}
-                </Text>
-            </TouchableOpacity>
+        <SafeAreaProvider>
+            <View style={styles.container}>
+                <Text style={styles.title}>シンプルなToDoアプリ</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="タスク名を入力してください"
+                    value={taskName}
+                    onChangeText={(text) => setTaskName(text)}
+                />
+                <TouchableOpacity 
+                    style={styles.addButton} 
+                    onPress={addTask}
+                >
+                    <Text style={styles.addButtonText}>
+                        {editIndex !== -1 ? "変更を保存" : "タスクを追加"}
+                    </Text>
+                </TouchableOpacity>
 
-            <FlatList
-                data={taskArray} 
-                renderItem={TaskList} 
-                keyExtractor={(item, index) => index.toString()} 
-            />
+                <FlatList
+                    data={taskArray} 
+                    renderItem={TaskList} 
+                    keyExtractor={(item, index) => index.toString()} 
+                />
 
-            <TaskModal visible={showModal} index={deleteIndex}/>
+                <TaskModal visible={showModal} index={deleteIndex}/>
 
-            {showModal? <View style={styles.modalOverLay}/> : null}
-        </View>
+                {showModal? <View style={styles.modalOverLay}/> : null}
+            </View>
+        </SafeAreaProvider>
     );
 };
 
@@ -202,24 +243,21 @@ const styles = StyleSheet.create({
         fontSize: 18, 
     }, 
     itemList: { 
-        fontSize: 19, 
+        fontSize: 22, 
     }, 
     taskButtons: { 
         flexDirection: "row",
-        justifyContent: "flex-end",
-        marginTop: 5,
-        marginBottom: 20, 
     }, 
     editButton: { 
         marginRight: 10, 
         color: "green", 
         fontWeight: "bold", 
-        fontSize: 18, 
+        fontSize: 14, 
     }, 
     deleteButton: { 
         color: "red", 
         fontWeight: "bold", 
-        fontSize: 18, 
+        fontSize: 14, 
     },
     modalWindow: {
         justifyContent: "center", 

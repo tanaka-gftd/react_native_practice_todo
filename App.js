@@ -144,7 +144,9 @@ const App = () => {
             <ListItem>
                 <ListItem.Content>
                     <ListItem.Title style={styles.itemList}>
-                        {item}
+                        <Text style={checkArray[index]? {textDecorationLine:"line-through"} : {textDecorationLine:"none"}}>
+                            {item}
+                        </Text>
                     </ListItem.Title>
                     
                     <ListItem.CheckBox

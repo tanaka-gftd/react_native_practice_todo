@@ -1,5 +1,5 @@
 //ReactとReactのHookを導入
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 //ReactNativeのコンポーネントを導入
 import { 
@@ -19,6 +19,9 @@ import { ListItem } from '@rneui/themed';
 
 //表示エリアが適切な場所(画面上部と被らないなど)になるよう、自動でパディングしてくれるライブラリ
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import * as SQLite from 'expo-sqlite';
+const db = SQLite.openDatabase('DB.db');
 
 
 const App = () => {
@@ -41,6 +44,9 @@ const App = () => {
     //各チェックボックスの状態を管理する配列用
     const [checkArray, setCheckArray] = useState([]);
 
+    //データベースから受け取ったデータの保持用
+    const[items, setItems] =useState([]);
+
 
     //タスクの新規登録orタスク名の変更を保存
     const addTask = () => {
@@ -56,6 +62,7 @@ const App = () => {
                 //新規登録の場合は配列に追加
                 setTaskArray([...taskArray, taskName]);  //タスク名を保存する配列に追加
                 setCheckArray([...checkArray, false]);  //チェックボックスを管理する配列にも新規追加(初期値はfalseで未チェック)
+                addTaskTable(taskName);
             }
             //処理後、フォーム欄を空欄にする
             setTaskName("");
@@ -103,7 +110,102 @@ const App = () => {
         const updateCheckArray = [...checkArray];
         updateCheckArray[index] = !updateCheckArray[index];
         setCheckArray(updateCheckArray);
+        changeTaskStatus(index);
     }
+
+
+    //初回レンダリング時にテーブル作成
+    useEffect(() => {
+
+        db.transaction((tx) => {
+            //SQL実行
+            tx.executeSql(
+                "CREATE TABLE IF NOT EXISTS TaskList(id integer primary key, task_name varchar(255) not null, is_done boolean not null);",
+                //'DROP TABLE TaskList;', //テーブル削除用
+                null,
+                //トランザクション成功時の処理
+                () => {
+                    console.log("テーブルの作成に成功 or 作成予定のテーブルはすでに存在しています");
+                    fitch();
+                },
+                //トランザクション失敗時の処理
+                () => {
+                    console.log("テーブルの作成に失敗しました");
+                    return true;  //失敗時は「return true」することでロールバックできる
+                }
+            );
+        },);
+    },[])
+
+    
+    //テーブルにタスク追加
+    const addTaskTable = (taskName) => {
+        db.transaction((tx) => {
+            //SQL実行
+            tx.executeSql(
+                "INSERT INTO TaskList(task_name, is_done) VALUES(?, ?);",
+                [taskName, false],
+                () => {
+                    console.log("レコードの追加に成功しました");
+                    fitch();
+                },
+                () => {
+                    console.log("レコードの追加に失敗しました");
+                    return true;
+                }
+            );
+        });
+    }
+
+
+    //テーブルに、タスクの完了,未完了切り替えを保存
+    const changeTaskStatus = (index) => {
+        db.transaction((tx) => {
+            //SQL実行
+            tx.executeSql(
+                "INSERT INTO TaskList(task_name, is_done) VALUES(?, ?);",
+                [taskArray[index], !checkArray[index]],
+                () => {
+                    console.log("タスクの状況変更に成功しました");
+                    fitch();
+                },
+                () => {
+                    console.log("タスクの状況変更に失敗しました");
+                    return true;
+                }
+            );
+        });
+    }
+
+
+    //データ取得
+    const fitch = () => {
+        db.transaction((tx) => {
+            //SQL実行
+            tx.executeSql(
+                "SELECT * FROM TaskList;",
+                [],
+                (_, resultSet) => {
+                    setItems(resultSet.rows._array);
+                    console.log(items);
+                    console.log(`${items.length}件のレコードを取得しました`);
+                    const taskTmpArray = [];
+                    const checkTmpArray = [];
+
+                    for(let i = 0; i<items.length; i++){
+                        taskTmpArray.push(items[i].task_name);
+                        checkTmpArray.push(items[i].is_done)
+                    }
+                    setTaskArray(taskTmpArray);
+                    setCheckArray(checkTmpArray);
+                },
+                () => {
+                    console.log("データの取得に失敗しました");
+                    return false;
+                }
+            );
+        });
+    };
 
 
     //タスク削除の確認用モーダル

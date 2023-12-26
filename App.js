@@ -9,6 +9,7 @@ import {
     TextInput, 
     TouchableOpacity, 
     FlatList,
+    ActivityIndicator
 } from "react-native";
 
 //モーダル用ライブラリ
@@ -45,7 +46,10 @@ const App = () => {
     const [checkArray, setCheckArray] = useState([]);
 
     //データベースから受け取ったデータの保持用
-    const[items, setItems] =useState([]);
+    const[items, setItems] = useState([]);
+
+    //ローディングアイコン表示(trueで表示)
+    const [isLoading, setIsLoading] = useState(true);
 
 
     //タスクの新規登録orタスク名の変更を保存
@@ -116,10 +120,9 @@ const App = () => {
 
     //初回レンダリング時にテーブル作成
     useEffect(() => {
-
-        db.transaction((tx) => {
+        db.transaction(async(tx) => {
             //SQL実行
-            tx.executeSql(
+            await tx.executeSql(
                 "CREATE TABLE IF NOT EXISTS TaskList(id integer primary key, task_name varchar(255) not null, is_done boolean not null);",
                 //'DROP TABLE TaskList;', //テーブル削除用
                 null,
@@ -135,14 +138,16 @@ const App = () => {
                 }
             );
         },);
+        setIsLoading(false);
     },[])
 
     
     //テーブルにタスク追加
-    const addTaskTable = (taskName) => {
-        db.transaction((tx) => {
+    const addTaskTable = async (taskName) => {
+        setIsLoading(true);
+        await db.transaction(async(tx) => {
             //SQL実行
-            tx.executeSql(
+            await tx.executeSql(
                 "INSERT INTO TaskList(task_name, is_done) VALUES(?, ?);",
                 [taskName, false],
                 () => {
@@ -155,14 +160,16 @@ const App = () => {
                 }
             );
         });
+        setIsLoading(false);
     }
 
 
     //テーブルに、タスクの完了,未完了切り替えを保存
-    const changeTaskStatus = (index) => {
-        db.transaction((tx) => {
+    const changeTaskStatus = async (index) => {
+        setIsLoading(true);
+        await db.transaction(async(tx) => {
             //SQL実行
-            tx.executeSql(
+            await tx.executeSql(
                 "INSERT INTO TaskList(task_name, is_done) VALUES(?, ?);",
                 [taskArray[index], !checkArray[index]],
                 () => {
@@ -175,14 +182,15 @@ const App = () => {
                 }
             );
         });
+        setIsLoading(false);
     }
 
 
     //データ取得
-    const fitch = () => {
-        db.transaction((tx) => {
+    const fitch = async () => {
+        await db.transaction(async(tx) => {
             //SQL実行
-            tx.executeSql(
+            await tx.executeSql(
                 "SELECT * FROM TaskList;",
                 [],
                 (_, resultSet) => {
@@ -275,9 +283,21 @@ const App = () => {
     );
 
 
+    //ローディング中アイコン
+    const Loading = () => {
+        return (
+            <View style={{display: isLoading? null : "none", flex: 1, justifyContent: 'center'}}>
+                <ActivityIndicator 
+                    size="large" 
+                />
+            </View>
+        )
+    }
+
+
     return (
         <SafeAreaProvider>
-            <View style={styles.container}>
+            <View style={{display: isLoading? "none" : null, ...styles.container}}>
                 <Text style={styles.title}>シンプルなToDoアプリ</Text>
                 <TextInput
                     style={styles.input}
@@ -304,8 +324,9 @@ const App = () => {
 
                 {showModal? <View style={styles.modalOverLay}/> : null}
             </View>
+            <Loading/>
         </SafeAreaProvider>
-    );
+    )
 };
 
 
@@ -313,7 +334,7 @@ const styles = StyleSheet.create({
     container: { 
         flex: 1, 
         padding: 40, 
-        marginTop: 40, 
+        marginTop: 40
     }, 
     title: { 
         fontSize: 24, 

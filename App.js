@@ -129,16 +129,16 @@ const App = () => {
                 //トランザクション成功時の処理
                 () => {
                     console.log("テーブルの作成に成功 or 作成予定のテーブルはすでに存在しています");
-                    fitch();
+                    getData();
                 },
                 //トランザクション失敗時の処理
                 () => {
                     console.log("テーブルの作成に失敗しました");
+                    setIsLoading(false);
                     return true;  //失敗時は「return true」することでロールバックできる
                 }
             );
         },);
-        setIsLoading(false);
     },[])
 
     
@@ -152,15 +152,15 @@ const App = () => {
                 [taskName, false],
                 () => {
                     console.log("レコードの追加に成功しました");
-                    fitch();
+                    getData();
                 },
                 () => {
                     console.log("レコードの追加に失敗しました");
+                    setIsLoading(false);
                     return true;
                 }
             );
         });
-        setIsLoading(false);
     }
 
 
@@ -174,20 +174,20 @@ const App = () => {
                 [taskArray[index], !checkArray[index]],
                 () => {
                     console.log("タスクの状況変更に成功しました");
-                    fitch();
+                    getData();
                 },
                 () => {
                     console.log("タスクの状況変更に失敗しました");
+                    setIsLoading(false);
                     return true;
                 }
             );
         });
-        setIsLoading(false);
     }
 
 
-    //データ取得
-    const fitch = async () => {
+    //データベースからデータを取得
+    const getData = async () => {
         await db.transaction(async(tx) => {
             //SQL実行
             await tx.executeSql(
@@ -209,10 +209,12 @@ const App = () => {
                 },
                 () => {
                     console.log("データの取得に失敗しました");
+                    setIsLoading(false);
                     return false;
                 }
             );
         });
+        setIsLoading(false);
     };
 
 
@@ -351,7 +353,8 @@ const styles = StyleSheet.create({
         borderWidth: 3, 
         borderColor: "#ccc", 
         padding: 10, 
-        marginBottom: 10, 
+        marginBottom: 10,
+        paddingLeft: 10,
         borderRadius: 10, 
         fontSize: 18, 
     }, 

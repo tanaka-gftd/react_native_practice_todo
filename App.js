@@ -33,10 +33,10 @@ const App = () => {
     //登録されたタスクの保持用
     const [taskArray, setTaskArray] = useState([]);
 
-    //タスクのエディット用(表示用)
+    //フロントで保持しているタスクの配列から、名称変更するタスクのインデックス
     const [editIndex, setEditIndex] = useState(-1);
 
-    //タスクのエディット用(DBへの送信用)
+    //名称変更するタスクのid(DBでの主キー)
     const [editId, setEditId] = useState(-1)
 
     //削除確認用モーダルの表示非表示切り替え用
@@ -44,6 +44,9 @@ const App = () => {
 
     //タスクを格納した配列から、削除対象となるインデックス
     const [deleteIndex, setDeleteIndex] = useState(0);
+
+    //削除するタスク
+    const [deleteItem, setDeleteItem] = useState(0);
 
     //各チェックボックスの状態を管理する配列用
     const [checkArray, setCheckArray] = useState([]);
@@ -89,11 +92,12 @@ const App = () => {
 
     //削除確認用モーダルの表示
     //タスク名変更中に削除確認用モーダルを開いた場合、タスク名変更処理を取りやめる
-    const openDeleteModal = (index) => {
+    const openDeleteModal = (index, item) => {
         setEditIndex(-1);
         setTaskName("");
         setShowModal(true);
         setDeleteIndex(index);
+        setDeleteItem(item);
     };
 
 
@@ -108,6 +112,8 @@ const App = () => {
         const updateCheckArray = [...checkArray];
         updateCheckArray.splice(index, 1); 
         setCheckArray(updateCheckArray);
+
+        logicalDeleteTask(deleteItem);
 
         //モーダルを閉じる
         setShowModal(false);
@@ -128,7 +134,7 @@ const App = () => {
         db.transaction(async(tx) => {
             //SQL実行
             await tx.executeSql(
-                "CREATE TABLE IF NOT EXISTS TaskList(id integer primary key, task_name varchar(255) not null, is_done boolean not null);",
+                "CREATE TABLE IF NOT EXISTS TaskList(id integer primary key, task_name varchar(255) not null, is_done boolean not null, is_delete boolean not null);",
                 //'DROP TABLE TaskList;', //テーブル削除用
                 null,
                 //トランザクション成功時の処理
@@ -153,8 +159,8 @@ const App = () => {
         await db.transaction(async(tx) => {
             //SQL実行
             await tx.executeSql(
-                "INSERT INTO TaskList(task_name, is_done) VALUES(?, ?);",
-                [taskName, false],
+                "INSERT INTO TaskList(task_name, is_done, is_delete) VALUES(?, ?, ?);",
+                [taskName, false, false],
                 () => {
                     console.log("レコードの追加に成功しました");
                     getData();
@@ -214,6 +220,29 @@ const App = () => {
     }
 
 
+    //タスク削除はDB上では論理削除とする
+    const logicalDeleteTask = async (item) => {
+        setIsLoading(true);
+        await db.transaction(async(tx) => {
+            //SQL実行
+            await tx.executeSql(
+                "UPDATE TaskList SET is_delete=(?) WHERE id=(?);",
+                [!item.is_delete, item.id],
+                () => {
+                    console.log("タスクの名称変更に成功しました");
+                    setEditId(-1);
+                    getData();
+                },
+                () => {
+                    console.log("タスクの名称変更に失敗しました");
+                    setIsLoading(false);
+                    return true;
+                }
+            );
+        });
+    }
+
+
     //データベースからデータを取得
     const getData = async () => {
         await db.transaction(async(tx) => {
@@ -251,7 +280,7 @@ const App = () => {
         <Modal visible={showModal}>
             <View style={styles.modalWindow}>
                 <Text style={{fontSize: 20, marginBottom: 25, fontWeight: "bold"}}>
-                    {taskArray[deleteIndex]} 
+                    {deleteItem.task_name} 
                 </Text>
                 <Text style={{fontSize: 16, marginBottom: 25, fontWeight: "bold"}}>
                     このタスクを本当に削除しますか？
@@ -280,7 +309,7 @@ const App = () => {
     //タスク名変更とタスク削除も追加
     //各タスクごとにチェックボックスも用意
     const TaskList = ({item, index}) => (
-        <View style={{borderBottomWidth: 1}}>
+        <View style={{display: item.is_delete? "none": null, borderBottomWidth: 1}}>
             <ListItem>
                 <ListItem.Content>
                     <ListItem.Title style={styles.itemList}>
@@ -303,7 +332,7 @@ const App = () => {
                             <Text style={styles.editButton}>タスク名変更</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={()=>openDeleteModal(index)}>
+                        <TouchableOpacity onPress={()=>openDeleteModal(index, item)}>
                             <Text style={styles.deleteButton}>タスク削除</Text>
                         </TouchableOpacity>
                     </View>

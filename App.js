@@ -229,12 +229,12 @@ const App = () => {
                 "UPDATE TaskList SET is_delete=(?) WHERE id=(?);",
                 [!item.is_delete, item.id],
                 () => {
-                    console.log("タスクの名称変更に成功しました");
+                    console.log("タスクの削除に成功しました");
                     setEditId(-1);
                     getData();
                 },
                 () => {
-                    console.log("タスクの名称変更に失敗しました");
+                    console.log("タスクの削除に失敗しました");
                     setIsLoading(false);
                     return true;
                 }

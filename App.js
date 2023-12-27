@@ -110,11 +110,11 @@ const App = () => {
 
 
     //チェックボックスのチェック,未チェック切り替え
-    const check = (index) => {
+    const check = (index, id) => {
         const updateCheckArray = [...checkArray];
         updateCheckArray[index] = !updateCheckArray[index];
         setCheckArray(updateCheckArray);
-        changeTaskStatus(index);
+        changeTaskStatus(index, id);
     }
 
 
@@ -165,13 +165,13 @@ const App = () => {
 
 
     //テーブルに、タスクの完了,未完了切り替えを保存
-    const changeTaskStatus = async (index) => {
+    const changeTaskStatus = async (index, id) => {
         setIsLoading(true);
         await db.transaction(async(tx) => {
             //SQL実行
             await tx.executeSql(
-                "INSERT INTO TaskList(task_name, is_done) VALUES(?, ?);",
-                [taskArray[index], !checkArray[index]],
+                "UPDATE TaskList SET is_done=(?) WHERE id=(?);",
+                [!checkArray[index],id],
                 () => {
                     console.log("タスクの状況変更に成功しました");
                     getData();
@@ -256,17 +256,17 @@ const App = () => {
             <ListItem>
                 <ListItem.Content>
                     <ListItem.Title style={styles.itemList}>
-                        <Text style={checkArray[index]? {textDecorationLine:"line-through"} : {textDecorationLine:"none"}}>
-                            {item}
+                        <Text style={item.is_done? {textDecorationLine:"line-through"} : {textDecorationLine:"none"}}>
+                            {item.task_name}
                         </Text>
                     </ListItem.Title>
                     
                     <ListItem.CheckBox
                         title="完了したらチェック"
                         checkedTitle="タスク完了済み"
-                        checked={checkArray[index]}
+                        checked={item.is_done}
                         checkedColor="#367b22"
-                        onPress={()=>check(index)}
+                        onPress={()=>check(index, item.id)}
                         containerStyle={{marginTop:10, marginBottom:15}}
                     />
             
@@ -317,7 +317,7 @@ const App = () => {
                 </TouchableOpacity>
 
                 <FlatList
-                    data={taskArray} 
+                    data={items} 
                     renderItem={TaskList} 
                     keyExtractor={(item, index) => index.toString()} 
                 />

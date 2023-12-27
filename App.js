@@ -33,8 +33,11 @@ const App = () => {
     //登録されたタスクの保持用
     const [taskArray, setTaskArray] = useState([]);
 
-    //タスクのエディット用
+    //タスクのエディット用(表示用)
     const [editIndex, setEditIndex] = useState(-1);
+
+    //タスクのエディット用(DBへの送信用)
+    const [editId, setEditId] = useState(-1)
 
     //削除確認用モーダルの表示非表示切り替え用
     const [showModal, setShowModal] = useState(false);
@@ -61,6 +64,7 @@ const App = () => {
                 const updatedTasks = [...taskArray];
                 updatedTasks[editIndex] = taskName;
                 setTaskArray(updatedTasks);
+                changeTaskName(editId);
                 setEditIndex(-1);
             }else{
                 //新規登録の場合は配列に追加
@@ -75,9 +79,10 @@ const App = () => {
 
 
     //タスク名の変更
-    const editTask = (index) => { 
+    const editTask = (index, id) => { 
         const taskToEdit = taskArray[index]; 
         setTaskName(taskToEdit); //変更したいタスクの名前をフォームに表示させる
+        setEditId(id);
         setEditIndex(index); 
     }; 
 
@@ -110,11 +115,11 @@ const App = () => {
 
 
     //チェックボックスのチェック,未チェック切り替え
-    const check = (index, id) => {
+    const check = (index, item) => {
         const updateCheckArray = [...checkArray];
         updateCheckArray[index] = !updateCheckArray[index];
         setCheckArray(updateCheckArray);
-        changeTaskStatus(index, id);
+        changeTaskStatus(item);
     }
 
 
@@ -165,19 +170,42 @@ const App = () => {
 
 
     //テーブルに、タスクの完了,未完了切り替えを保存
-    const changeTaskStatus = async (index, id) => {
+    const changeTaskStatus = async (item) => {
         setIsLoading(true);
         await db.transaction(async(tx) => {
             //SQL実行
             await tx.executeSql(
                 "UPDATE TaskList SET is_done=(?) WHERE id=(?);",
-                [!checkArray[index],id],
+                [!item.is_done, item.id],
                 () => {
                     console.log("タスクの状況変更に成功しました");
                     getData();
                 },
                 () => {
                     console.log("タスクの状況変更に失敗しました");
+                    setIsLoading(false);
+                    return true;
+                }
+            );
+        });
+    }
+
+
+    //タスク名変更をDBに保存
+    const changeTaskName = async (id) => {
+        setIsLoading(true);
+        await db.transaction(async(tx) => {
+            //SQL実行
+            await tx.executeSql(
+                "UPDATE TaskList SET task_name=(?) WHERE id=(?);",
+                [taskName, id],
+                () => {
+                    console.log("タスクの名称変更に成功しました");
+                    setEditId(-1);
+                    getData();
+                },
+                () => {
+                    console.log("タスクの名称変更に失敗しました");
                     setIsLoading(false);
                     return true;
                 }
@@ -266,12 +294,12 @@ const App = () => {
                         checkedTitle="タスク完了済み"
                         checked={item.is_done}
                         checkedColor="#367b22"
-                        onPress={()=>check(index, item.id)}
+                        onPress={()=>check(index, item)}
                         containerStyle={{marginTop:10, marginBottom:15}}
                     />
             
                     <View style={styles.taskButtons}>
-                        <TouchableOpacity onPress={()=>editTask(index)}>
+                        <TouchableOpacity onPress={()=>editTask(index, item.id)}>
                             <Text style={styles.editButton}>タスク名変更</Text>
                         </TouchableOpacity>
 

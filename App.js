@@ -135,6 +135,18 @@ const App = () => {
     },[])
 
 
+    //テーブルの中身確認用
+    /*
+        useStateの更新速度よりも、コンソールへの出力処理速度の方が遥かに早いため、
+        stateが更新されたかどうかにconsole.logを用いるのであれば、以下のようにしないといけない。
+        （普通にconsole.logを使うと、state更新前の値がコンソールに出力されてしまう）
+    */
+    useEffect(() => {
+        console.log(items);
+        console.log(`${items.length}件のレコードを取得しました`);
+    },[items])
+
+
     //DBのテーブル作成
     const createTable = () => {
         db.transaction(async(tx) => {
@@ -257,8 +269,7 @@ const App = () => {
                 [],
                 (_, resultSet) => {
                     setItems(resultSet.rows._array);
-                    console.log(items);
-                    console.log(`${items.length}件のレコードを取得しました`);
+
                     const taskTmpArray = [];
                     const checkTmpArray = [];
 

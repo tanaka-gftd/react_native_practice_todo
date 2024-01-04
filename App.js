@@ -280,6 +280,29 @@ const App = () => {
     };
 
 
+    //DBのテーブル初期化(開発用)
+    const dropTable = async () => {
+        await db.transaction(async(tx) => {
+            //SQL実行
+            await tx.executeSql(
+                'DROP TABLE TaskList;',
+                null,
+                () => {
+                    setTaskArray([]);
+                    setCheckArray([]);
+                    setItems([]);
+                    console.log("DBのテーブルを初期化しました");
+                    createTable();
+                },
+                () => {
+                    console.log("テーブルの初期化に失敗しました");
+                    return true;
+                }
+            );
+        });
+    }
+
+
     //タスク削除の確認用モーダル
     const TaskModal = () => (
         <Modal visible={showModal}>
@@ -383,6 +406,22 @@ const App = () => {
                     renderItem={TaskList} 
                     keyExtractor={(item, index) => index.toString()} 
                 />
+
+               {/* 開発用のテーブル初期化ボタン */}
+                <TouchableOpacity 
+                    style={{
+                        backgroundColor: "red", 
+                        padding: 10, 
+                        borderRadius: 5, 
+                        marginTop: 20,
+                        marginBottom: 10,
+                    }} 
+                    onPress={dropTable}
+                >
+                    <Text style={styles.addButtonText}>
+                        DBのテーブル初期化(開発用)
+                    </Text>
+                </TouchableOpacity>
 
                 <TaskModal visible={showModal} index={deleteIndex}/>
 

@@ -131,11 +131,16 @@ const App = () => {
 
     //初回レンダリング時にテーブル作成
     useEffect(() => {
+        createTable();
+    },[])
+
+
+    //DBのテーブル作成
+    const createTable = () => {
         db.transaction(async(tx) => {
             //SQL実行
             await tx.executeSql(
                 "CREATE TABLE IF NOT EXISTS TaskList(id integer primary key, task_name varchar(255) not null, is_done boolean not null, is_delete boolean not null);",
-                //'DROP TABLE TaskList;', //テーブル削除用
                 null,
                 //トランザクション成功時の処理
                 () => {
@@ -149,8 +154,8 @@ const App = () => {
                     return true;  //失敗時は「return true」することでロールバックできる
                 }
             );
-        },);
-    },[])
+        });
+    }
 
     
     //テーブルにタスク追加

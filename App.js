@@ -97,12 +97,6 @@ const App = () => {
     };
 
 
-    //チェックボックスのチェック,未チェック切り替え
-    const check = (item) => {
-        changeTaskStatus(item);
-    }
-
-
     //初回レンダリング時にテーブル作成
     useEffect(() => {
         createTable();
@@ -330,7 +324,7 @@ const App = () => {
                         checkedTitle="タスク完了済み"
                         checked={item.is_done}
                         checkedColor="#367b22"
-                        onPress={()=>check(item)}
+                        onPress={()=> changeTaskStatus(item)}
                         containerStyle={{marginTop:10, marginBottom:15}}
                     />
             

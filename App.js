@@ -30,9 +30,6 @@ const App = () => {
     //フォームに書き込まれた内容を保持
     const [taskName, setTaskName] = useState("");
 
-    //登録されたタスクの保持用
-    const [taskArray, setTaskArray] = useState([]);
-
     //フロントで保持しているタスクの配列から、名称変更するタスクのインデックス
     const [editIndex, setEditIndex] = useState(-1);
 
@@ -61,14 +58,10 @@ const App = () => {
         if(taskName){
             if(editIndex !== -1){
                 //「editIndex !== -1」の場合、つまり、タスク名を変更中の場合なら、変更されたタスク名を保存し終了
-                const updatedTasks = [...taskArray];
-                updatedTasks[editIndex] = taskName;
-                setTaskArray(updatedTasks);
                 changeTaskName(editId);
                 setEditIndex(-1);
             }else{
                 //新規登録の場合は配列に追加
-                setTaskArray([...taskArray, taskName]);  //タスク名を保存する配列に追加
                 addTaskTable(taskName);
             }
             //処理後、フォーム欄を空欄にする
@@ -79,8 +72,8 @@ const App = () => {
 
     //タスク名の変更
     const editTask = (index, id) => { 
-        const taskToEdit = taskArray[index]; 
-        setTaskName(taskToEdit); //変更したいタスクの名前をフォームに表示させる
+        const task = items[index];
+        setTaskName(task.task_name); //変更したいタスクの名前をフォームに表示させる
         setEditId(id);
         setEditIndex(index); 
     }; 
@@ -100,15 +93,9 @@ const App = () => {
     //タスクの削除
     //taskArrayから指定されたインデックスの要素(タスク)を削除して、 setTaskArrayでセットし直す
     //削除するタスクのチェックボックスの状態も削除
-    const deleteTask = (index) => {
-        const updatedTasks = [...taskArray];
-        updatedTasks.splice(index, 1); 
-        setTaskArray(updatedTasks);
-
+    const deleteTask = () => {
         logicalDeleteTask(deleteItem);
-
-        //モーダルを閉じる
-        setShowModal(false);
+        setShowModal(false);  //モーダルを閉じる
     };
 
 
@@ -264,7 +251,7 @@ const App = () => {
                     for(let i = 0; i<items.length; i++){
                         taskTmpArray.push(items[i].task_name);
                     }
-                    setTaskArray(taskTmpArray);
+                    
                 },
                 () => {
                     console.log("データの取得に失敗しました");
@@ -285,7 +272,6 @@ const App = () => {
                 'DROP TABLE TaskList;',
                 null,
                 () => {
-                    setTaskArray([]);
                     setItems([]);
                     console.log("DBのテーブルを初期化しました");
                     createTable();

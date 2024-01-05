@@ -162,6 +162,8 @@ const App = () => {
 
     //テーブルに、タスクの完了,未完了切り替えを保存
     const changeTaskStatus = (item) => {
+        setIsEditName(false);
+        setTaskName("");
         setIsLoading(true);
         db.transaction((tx) => {
             //SQL実行

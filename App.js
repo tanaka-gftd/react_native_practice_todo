@@ -31,7 +31,7 @@ const App = () => {
     const [taskName, setTaskName] = useState("");
 
     //フロントで保持しているタスクの配列から、名称変更するタスクのインデックス
-    const [editIndex, setEditIndex] = useState(-1);
+    const [isEditName, setIsEditName] = useState(false);
 
     //名称変更するタスクのid(DBでの主キー)
     const [editId, setEditId] = useState(-1)
@@ -56,10 +56,10 @@ const App = () => {
     const addTask = () => {
         //フォームにタスク名が入力されていれば、以下の処理を行う
         if(taskName){
-            if(editIndex !== -1){
-                //「editIndex !== -1」の場合、つまり、タスク名を変更中の場合なら、変更されたタスク名を保存し終了
+            if(isEditName){
+                //isEditNameがtrueの場合、つまり、タスク名を変更中の場合なら、変更されたタスク名を保存し終了
                 changeTaskName(editId);
-                setEditIndex(-1);
+                setIsEditName(false);
             }else{
                 //新規登録の場合は配列に追加
                 addTaskTable(taskName);
@@ -72,17 +72,17 @@ const App = () => {
 
     //タスク名の変更
     const editTask = (index, id) => { 
+        setIsEditName(true);
         const task = items[index];
         setTaskName(task.task_name); //変更したいタスクの名前をフォームに表示させる
         setEditId(id);
-        setEditIndex(index); 
     }; 
 
 
     //削除確認用モーダルの表示
     //タスク名変更中に削除確認用モーダルを開いた場合、タスク名変更処理を取りやめる
     const openDeleteModal = (index, item) => {
-        setEditIndex(-1);
+        setIsEditName(false);
         setTaskName("");
         setShowModal(true);
         setDeleteIndex(index);
@@ -91,8 +91,6 @@ const App = () => {
 
 
     //タスクの削除
-    //taskArrayから指定されたインデックスの要素(タスク)を削除して、 setTaskArrayでセットし直す
-    //削除するタスクのチェックボックスの状態も削除
     const deleteTask = () => {
         logicalDeleteTask(deleteItem);
         setShowModal(false);  //モーダルを閉じる
@@ -223,7 +221,6 @@ const App = () => {
                 [!item.is_delete, item.id],
                 () => {
                     console.log("タスクの削除に成功しました");
-                    setEditId(-1);
                     getData();
                 },
                 () => {
@@ -379,7 +376,7 @@ const App = () => {
                     onPress={addTask}
                 >
                     <Text style={styles.addButtonText}>
-                        {editIndex !== -1 ? "変更を保存" : "タスクを追加"}
+                        {isEditName ? "変更を保存" : "タスクを追加"}
                     </Text>
                 </TouchableOpacity>
 

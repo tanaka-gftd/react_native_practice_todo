@@ -48,9 +48,6 @@ const App = () => {
     //削除するタスク
     const [deleteItem, setDeleteItem] = useState(0);
 
-    //各チェックボックスの状態を管理する配列用
-    const [checkArray, setCheckArray] = useState([]);
-
     //データベースから受け取ったデータの保持用
     const[items, setItems] = useState([]);
 
@@ -72,7 +69,6 @@ const App = () => {
             }else{
                 //新規登録の場合は配列に追加
                 setTaskArray([...taskArray, taskName]);  //タスク名を保存する配列に追加
-                setCheckArray([...checkArray, false]);  //チェックボックスを管理する配列にも新規追加(初期値はfalseで未チェック)
                 addTaskTable(taskName);
             }
             //処理後、フォーム欄を空欄にする
@@ -109,10 +105,6 @@ const App = () => {
         updatedTasks.splice(index, 1); 
         setTaskArray(updatedTasks);
 
-        const updateCheckArray = [...checkArray];
-        updateCheckArray.splice(index, 1); 
-        setCheckArray(updateCheckArray);
-
         logicalDeleteTask(deleteItem);
 
         //モーダルを閉じる
@@ -121,10 +113,7 @@ const App = () => {
 
 
     //チェックボックスのチェック,未チェック切り替え
-    const check = (index, item) => {
-        const updateCheckArray = [...checkArray];
-        updateCheckArray[index] = !updateCheckArray[index];
-        setCheckArray(updateCheckArray);
+    const check = (item) => {
         changeTaskStatus(item);
     }
 
@@ -271,14 +260,11 @@ const App = () => {
                     setItems(resultSet.rows._array);
 
                     const taskTmpArray = [];
-                    const checkTmpArray = [];
-
+                    
                     for(let i = 0; i<items.length; i++){
                         taskTmpArray.push(items[i].task_name);
-                        checkTmpArray.push(items[i].is_done)
                     }
                     setTaskArray(taskTmpArray);
-                    setCheckArray(checkTmpArray);
                 },
                 () => {
                     console.log("データの取得に失敗しました");
@@ -300,7 +286,6 @@ const App = () => {
                 null,
                 () => {
                     setTaskArray([]);
-                    setCheckArray([]);
                     setItems([]);
                     console.log("DBのテーブルを初期化しました");
                     createTable();
@@ -362,7 +347,7 @@ const App = () => {
                         checkedTitle="タスク完了済み"
                         checked={item.is_done}
                         checkedColor="#367b22"
-                        onPress={()=>check(index, item)}
+                        onPress={()=>check(item)}
                         containerStyle={{marginTop:10, marginBottom:15}}
                     />
             

@@ -149,9 +149,9 @@ const App = () => {
 
     //DBのテーブル作成
     const createTable = () => {
-        db.transaction(async(tx) => {
+        db.transaction((tx) => {
             //SQL実行
-            await tx.executeSql(
+            tx.executeSql(
                 "CREATE TABLE IF NOT EXISTS TaskList(id integer primary key, task_name varchar(255) not null, is_done boolean not null, is_delete boolean not null);",
                 null,
                 //トランザクション成功時の処理
@@ -171,11 +171,11 @@ const App = () => {
 
     
     //テーブルにタスク追加
-    const addTaskTable = async (taskName) => {
+    const addTaskTable = (taskName) => {
         setIsLoading(true);
-        await db.transaction(async(tx) => {
+        db.transaction((tx) => {
             //SQL実行
-            await tx.executeSql(
+            tx.executeSql(
                 "INSERT INTO TaskList(task_name, is_done, is_delete) VALUES(?, ?, ?);",
                 [taskName, false, false],
                 () => {
@@ -193,11 +193,11 @@ const App = () => {
 
 
     //テーブルに、タスクの完了,未完了切り替えを保存
-    const changeTaskStatus = async (item) => {
+    const changeTaskStatus = (item) => {
         setIsLoading(true);
-        await db.transaction(async(tx) => {
+        db.transaction((tx) => {
             //SQL実行
-            await tx.executeSql(
+            tx.executeSql(
                 "UPDATE TaskList SET is_done=(?) WHERE id=(?);",
                 [!item.is_done, item.id],
                 () => {
@@ -215,11 +215,11 @@ const App = () => {
 
 
     //タスク名変更をDBに保存
-    const changeTaskName = async (id) => {
+    const changeTaskName = (id) => {
         setIsLoading(true);
-        await db.transaction(async(tx) => {
+        db.transaction((tx) => {
             //SQL実行
-            await tx.executeSql(
+            tx.executeSql(
                 "UPDATE TaskList SET task_name=(?) WHERE id=(?);",
                 [taskName, id],
                 () => {
@@ -238,11 +238,11 @@ const App = () => {
 
 
     //タスク削除はDB上では論理削除とする
-    const logicalDeleteTask = async (item) => {
+    const logicalDeleteTask = (item) => {
         setIsLoading(true);
-        await db.transaction(async(tx) => {
+        db.transaction((tx) => {
             //SQL実行
-            await tx.executeSql(
+            tx.executeSql(
                 "UPDATE TaskList SET is_delete=(?) WHERE id=(?);",
                 [!item.is_delete, item.id],
                 () => {
@@ -261,10 +261,10 @@ const App = () => {
 
 
     //データベースからデータを取得
-    const getData = async () => {
-        await db.transaction(async(tx) => {
+    const getData = () => {
+        db.transaction((tx) => {
             //SQL実行
-            await tx.executeSql(
+            tx.executeSql(
                 "SELECT * FROM TaskList;",
                 [],
                 (_, resultSet) => {
@@ -292,10 +292,10 @@ const App = () => {
 
 
     //DBのテーブル初期化(開発用)
-    const dropTable = async () => {
-        await db.transaction(async(tx) => {
+    const dropTable = () => {
+        db.transaction((tx) => {
             //SQL実行
-            await tx.executeSql(
+            tx.executeSql(
                 'DROP TABLE TaskList;',
                 null,
                 () => {

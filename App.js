@@ -39,9 +39,6 @@ const App = () => {
     //削除確認用モーダルの表示非表示切り替え用
     const [showModal, setShowModal] = useState(false);
 
-    //タスクを格納した配列から、削除対象となるインデックス
-    const [deleteIndex, setDeleteIndex] = useState(0);
-
     //削除するタスク
     const [deleteItem, setDeleteItem] = useState(0);
 
@@ -71,29 +68,20 @@ const App = () => {
 
 
     //タスク名の変更
-    const editTask = (index, id) => { 
+    const editTask = (item) => { 
         setIsEditName(true);
-        const task = items[index];
-        setTaskName(task.task_name); //変更したいタスクの名前をフォームに表示させる
-        setEditId(id);
+        setTaskName(item.task_name); //変更したいタスクの名前をフォームに表示させる
+        setEditId(item.id);
     }; 
 
 
     //削除確認用モーダルの表示
     //タスク名変更中に削除確認用モーダルを開いた場合、タスク名変更処理を取りやめる
-    const openDeleteModal = (index, item) => {
+    const openDeleteModal = (item) => {
         setIsEditName(false);
         setTaskName("");
         setShowModal(true);
-        setDeleteIndex(index);
         setDeleteItem(item);
-    };
-
-
-    //タスクの削除
-    const deleteTask = () => {
-        logicalDeleteTask(deleteItem);
-        setShowModal(false);  //モーダルを閉じる
     };
 
 
@@ -226,6 +214,7 @@ const App = () => {
                 }
             );
         });
+        setShowModal(false);
     }
 
 
@@ -291,7 +280,7 @@ const App = () => {
                 
                 
                 <View style={{justifyContent: "center", alignItems: "center"}}>
-                    <TouchableOpacity onPress={() => deleteTask(deleteIndex)}>
+                    <TouchableOpacity onPress={() => logicalDeleteTask(deleteItem)}>
                         <Text style={{color: "red", fontSize: 16, marginBottom: 30}}>
                             削除する
                         </Text>
@@ -331,11 +320,11 @@ const App = () => {
                     />
             
                     <View style={styles.taskButtons}>
-                        <TouchableOpacity onPress={()=>editTask(index, item.id)}>
+                        <TouchableOpacity onPress={()=>editTask(item)}>
                             <Text style={styles.editButton}>タスク名変更</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={()=>openDeleteModal(index, item)}>
+                        <TouchableOpacity onPress={()=>openDeleteModal(item)}>
                             <Text style={styles.deleteButton}>タスク削除</Text>
                         </TouchableOpacity>
                     </View>

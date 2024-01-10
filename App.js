@@ -398,7 +398,7 @@ const App = () => {
                     </Text>
                 </TouchableOpacity>
 
-                <TaskModal visible={showModal} index={deleteIndex}/>
+                <TaskModal visible={showModal}/>
 
                 {showModal? <View style={styles.modalOverLay}/> : null}
             </View>
